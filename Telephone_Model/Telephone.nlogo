@@ -24,7 +24,7 @@ to setup
   create-turtles Number_Players [
     set size 3                   ;; be easier to see
     set color 2
-    __set-line-thickness 2
+    ;    __set-line-thickness 2  ;; this command was commented out because it intereferes with the web version.
     set currently-playing 0
     set prize-count 0
     set current-word [""]]
