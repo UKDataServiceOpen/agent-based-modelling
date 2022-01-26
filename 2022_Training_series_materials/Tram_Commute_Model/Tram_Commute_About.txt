@@ -1,0 +1,74 @@
+## WHAT IS IT?
+This model is intended to demonstrate three broad concepts, each of which has an associated NetLogo extension: 
+•	importing and exporting files into NetLogo via the CSV extension, 
+•	loading point, line and polygon shapefiles into NetLogo via the GIS extension, and 
+•	building and navigating networks of agents via the NW extension.
+To achieve this, the model creates a cross-local authority tram network along with houses, commuters and places for them to travel to. The modeller can choose to create a randomly generated tram network via a few inputs that are only applicable to the random model (number of local authorities, number of tram stops, etc. all are indicated by "_Random_Only" in the name of the input) or can  load a real-world tram network using downloaded shape files (in this case, the shape files relate to the Greater Manchester combined authority and Metrolink system). 
+
+## HOW IT WORKS
+First, the "Projection" must be set to either "Random" or "GM_LAs". The model operation is broadly similar for both, although the set up procedures are different because. 
+
+In both cases, the NetLogo world is divided into local authorities, each with a name and resident population, before tram stops are located and linked. If "Projection" is set to:
+•	"Random" the model setup uses the value of the "Number_Generated_LAs_Random_Only" slider (between 2 and 15 in increments of 1) and built-in NetLogo functions to determine the number and random location of "LAs" agents. The LAs agents are then assigned a random population below the value of "Max_Random_Population" as input by the modeller. The LAs then adjust their colour relative to their population (with a special check to ensure they do not change it to black). The model then asks black patches to observe if any of their neighbours are a non-black colour and, if so, to change their colour to match (choosing randomly between colours if two or more neighbours are not black). The model setup then uses the value of "Number_Generated_Tramstops_Random_Only" slider (between 3 and 100 in increments of 1) to determine the number and initial location of tramstops throughout the entire area. The tramstops are then connected in a preferential attachment network and their position is adjusted by repeating "layout-spring" to improve its appearance.
+•	"GM_LAs" the model setup draws on .prj, .csv, and .shp files made available by the modeller. These files contain the number, location, shape and name of local authorities (as well as their resident population), and the number, location and names of tramstops as well as how they are linked. 
+
+The local authorities will display their names if the modeller input "Label_LAs?" is set to TRUE. The tramstops will display their names if the modeller input "Label_Tramstops?" is set to TRUE. If "Projection" is set to random, the names of LAs and tramstop agents is simply their who number. 
+
+After this, the model setup is the same for both projections. Setup continues as the model uses the populations of each local authority and built-in NetLogo functions to create a number of houses within each local authority between 1 and the total population of that local authority). The houses are then located randomly within the local authority. The model then creates commuter agents equal to the population of the local authority, unless "Reduce_Population_for_display?" is set to TRUE. This limits the number of commuters per local authority to the value of "Max_Random_Population" + (the total population of the local authority / 1000). Although "Reduce_Population_for_display?" can be set to TRUE for both the random and non-random projections, it will only have a discernible effect on the non-random projection if "Max_Random_Population" is significantly smaller than the actual population of a given local authority. This switch is intended to improve the setup time, run speed and visual interpretability of non-random projections when the real-world population is problematically high. 
+
+However many houses are created, they are then connected to the tram network by creating a link to the nearest tramstop.
+
+The model then uses value of "Number_Generated_Places"  (between 3 and 100 in increments of 1) to create and locate places (non-house buildings that commuters can travel to) within the local authorities. The places are then connected to the tram network by creating a link to the nearest tramstop.
+
+The model offers the option to locate houses and places either only within local authorities that have tram stops within their boundaries (by setting "Tram Commute Only?" to TRUE) or within any local authority (by setting "Tram Commute Only?" to FALSE).
+
+The model then assigns commuters a small set of places across the network that they can travel to. The house that each commuter begins at is also added to this list of travel destinations. When the model runs, the commuters select one of their destinations, plots a path to get there via the tram network, and proceeds to move across the network. When they arrive, they choose a new destination and repeat the process. 
+
+The model offers the option to allow to export data to a .csv file through the modeller inputs of "Export data?" and "Output_file". If "Export_data?" is set to TRUE, the model creates a .csv named using the input in the "Output_file" field and 6 columns.  Whenever a commuter arrives at their destination, they write a line to the .csv file that states their who number, the house or place at which the journey started, the local authority in which the journey started, the house or place at which the journey ended, the local authority in which the journey ended, and the number of time steps elapsed during the journey. 
+
+NOTE: The random projection model requires several inputs that the non-random projection model does not (Number_Generated_LAs, Number_Generated_Tramstops, Max_Random_Population).
+The non-random projection model draws these same details from the uploaded .shp files. Setting these variables will have no effect on the model if "Projection" is not set to "Random". 
+
+There are also options intended to be useful for demonstration and bug-testing purposes.  "Reduce_Population_for_Dispaly?" limits the population to a fraction of its total in order to speed up the set up and go processes as well as improve the interpretability of the display. If "Garrulous?" is set to TRUE, the model runs with many outputs written to the command centre in order to improve bug testing. This is unlikely to be interesting for normal operation. 
+
+## HOW TO USE IT
+Put all files in a sensible folder. This is especially important when running the non-random projection as the model will need to access the shape files and/or .csv files. You may need to rename the files, the folders they are in, or the path to the files as it appears in the code. 
+When the model is opened, the modeller will need to decide whether to run a random or non-random model. The modeller should set the options for labelling tram stops and/or local authorities, restricting the population for display, restricting the houses and places to LAs with tramstops only, and whether or not an export file should be created (as well as setting the name of that file in the Output_File field). 
+Random models will require attention to the inputs at the bottom (Max_Random_Populaton, Number_of_Generated_LAs, Number_of_Generated_Tramstops, Number_of_Generated_Places). 
+Hit set up. 
+Hit Go once or Go Forever. 
+
+## THINGS TO NOTICE
+This model is not particularly realistic. It assumes that all commuters travel directly from their houses to their nearest tram stop, travel by tram to the stop nearest their intended destination, then travel directly to that destination before turning around and repeating the process with a new destination (which might be their house). 
+There is no wait time at tram stops. There is no maximum capacity on the trams. There is no distribution of travel speeds among commuters to account for people that might bike, drive, bus, rollerskate or otherwise travel to the tram stop or people that walk slower than others. 
+Commuters do not spend any significant time at their destinations. They do not have regular patterns of travel, analogous to a standard commute, but instead randomly pick their destination from among the small set of destinations they have designated as “theirs”. 
+This is because this model is not intended to replicated an interesting real-wold behaviour with the detail and specificity needed to really say something about that behaviour. Instead, it is meant to demonstrate the processes of importing files, using GIS data, navigating networks, and running experiments. As such, the code is extremely thoroughly commented. 
+## THINGS TO TRY
+A couple of things to try would be to:
+•	run parameter sweeps on the random model to identify whether there are interesting interactions,
+•	replace the Greater Manchester shapefiles with analogous files for another tram network, or
+•	rewrite the output file to include reports from place-agents or tramstop-agents to identify which is the most popular.
+## EXTENDING THE MODEL
+Reasonable interactions would include:
+•	Adding bus, bike lane, road, train or other networks, 
+•	Define the destinations that commuters travel to by when they are likely to arrive or how long they spend there, 
+•	Add options to vary the travel speed, 
+•	Introduce actual trams to the tram network so that commuters wait at tram stops or when changing tram lines, 
+•	Other?
+## NETLOGO FEATURES
+
+## CREDITS AND REFERENCES
+This model use the NetLogo code examples for Travel The Line and GIS extension. 
+
+## HOW TO CITE
+If you mention this model or the NetLogo software in a publication, we ask that you include the citations below.
+For the model itself:
+* Kasmire, J. (2020). Tram Commute. UK Data Services and University of Manchester, UK.
+Please cite the NetLogo software as: 
+* Wilensky, U. (1999). NetLogo. http://ccl.northwestern.edu/netlogo/. Center for Connected Learning and Computer-Based Modeling, Northwestern University, Evanston, IL. 
+
+## COPYRIGHT AND LICENSE
+This work is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 3.0 License.  To view a copy of this license, visit https://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to Creative Commons, 559 Nathan Abbott Way, Stanford, California 94305, USA.
+Commercial licenses are also available. To inquire about commercial licenses, please contact Uri Wilensky at uri@northwestern.edu.
+This model was created as part of the project: CONNECTED MATHEMATICS: MAKING SENSE OF COMPLEX PHENOMENA THROUGH BUILDING OBJECT-BASED PARALLEL MODELS (OBPML).  The project gratefully acknowledges the support of the National Science Foundation (Applications of Advanced Technologies Program) -- grant numbers RED #9552950 and REC #9632612.
+This model was converted to NetLogo as part of the projects: PARTICIPATORY SIMULATIONS: NETWORK-BASED DESIGN FOR SYSTEMS LEARNING IN CLASSROOMS and/or INTEGRATED SIMULATION AND MODELING ENVIRONMENT. The project gratefully acknowledges the support of the National Science Foundation (REPP & ROLE programs) -- grant numbers REC #9814682 and REC-0126227. Converted from StarLogoT to NetLogo, 2001.
