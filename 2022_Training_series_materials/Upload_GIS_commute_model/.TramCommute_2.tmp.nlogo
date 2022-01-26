@@ -84,7 +84,7 @@ end
 to setup-input                                                                                      ; The non-random projection also has several steps, many are similar to those in the random set up.
      gis:load-coordinate-system (word "Model_Data/" projection ".prj")                              ; 1- Set the coordinate system or 'projection'. This is optional as long as all of the datasets use the same coordinate system.
      set tramstops-dataset gis:load-dataset "Model_Data/GM_Tramstops.shp"                           ; Load all of your non-random datasets (as many as you need), assigning them to the globals created above.
-     set tramlines-dataset gis:load-dataset "Model_Data/GM_Tramlines.shp"
+     set tramlines-dataset gis:load-dataset "Model_Data/Tramlines_Current.shp"
      set LAs-dataset gis:load-dataset "Model_Data/GM_LAs_R.shp"
      gis:set-world-envelope (gis:envelope-union-of (gis:envelope-of tramstops-dataset)              ; 2- Set the world envelope to the union of all of the datasets' envelopes. This ensures they line up correctly.
                                                    (gis:envelope-of tramlines-dataset)
@@ -103,20 +103,21 @@ to setup-input                                                                  
           set ycor item 1 centroid-y                                                                ; Move it to the right position (up/down)
           set size 0                                                                                ; Set their size to 0 so as to be invisible ...
           set label-color yellow                                                                    ; Set their label color to yellow to increase visibility  ...
-          if Label_LAs? [set label gis:property-value vector-feature "name"]                        ; Set their label color to yellow to increase visibility  ...
-          set LAs-population-t gis:property-value vector-feature "population"                       ; Set their label to be their name, which is drawn from the imported shapefile ...
-          set LAs-name-t gis:property-value vector-feature "name"                                   ; And copy that name to turtles-own feature.
+          if Label_LAs? [set label gis:property-value vector-feature "name"]                        ; Set their label to be their name, which is drawn from the imported shapefile ...
+          set LAs-population-t gis:property-value vector-feature "population"                       ; Set their LAs-population variable to be the population value drawn from the imported shapefile...
+          set LAs-name-t gis:property-value vector-feature "name"                                   ; Set their LAs-name variable to be the name  value drawn from the imported shapefile...
           ask patch-here [set LAs-population [LAs-population-t] of LAs-here                         ; 7- Then the LA agents talks to the patch underneath themselves.
                           set LAs-name [LAs-name-t] of LAs-here                                     ; The LA agent asks the patch to copy details like population and name from the LA agent to itself.
           set pcolor red] ] ]                                                                       ; And also asks the patches to set their color to red.
-   set i i + 1 ]
+    set i i + 1 ]                                                                                   ; This code incrementally increases the value of 'i', so that the for-loop proceeds to the next LA.
+                                                                                                    ; The next LA will then run through the same #6 and #7 steps and increase 'i' by 1 until all LAs are created
 
-   gis:apply-coverage LAs-dataset "POPULATION" LAs-population                                       ; 8- Pass the population feature from the LA to the patches within the LA
-   gis:apply-coverage LAs-dataset "NAME" LAs-name                                                   ; Also pass the name feature from LA to patches.
-   let min-pop min [read-from-string LAs-population ] of patches with [is-string? LAs-population]   ; 9- The patches then set their color relative to their population to improve visibility.
-   ask patches with [is-string? LAs-population] [
-   set pcolor red + ((read-from-string LAs-population - min-pop) * .1 )
-    if pcolor = black [set pcolor pcolor + 5 ]]                                                     ; Ask any LA patches that are black to recolor themselves, just for clarity.
+   gis:apply-coverage LAs-dataset "POPULATION" LAs-population                                       ; 8- All pateches within the LA polygon then copy the values of population from the imported shapefile to the patch values
+   gis:apply-coverage LAs-dataset "NAME" LAs-name                                                   ; All pateches within the LA polygon then copy the values of name from the imported shapefile to the patch values
+   let min-pop min [read-from-string LAs-population ] of patches with [is-string? LAs-population]   ; 9- LA polygons then colour themselves by first setting a global variable to hold the population of the LA with the smallest population.
+   ask patches with [is-string? LAs-population] [                                                   ; Then, all patches that are within any LA (those with a value in their LAs-population feature)...
+   set pcolor red + ((read-from-string LAs-population - min-pop) * .1 )                             ; Set their colour to be red plus 10% of the difference between their population and the minimum population. The LA with the smallest population will be red.
+    if pcolor = black [set pcolor pcolor + 5 ]]                                                     ; Finally, all patches that are currently black (that is, not those coloured by population) reset themselves to near black for clarity.
 end
 
 to setup-trams
@@ -160,14 +161,15 @@ to setup-houses-and-places
   set-default-shape houses "house"                                                                  ; Set the default shape for a house to be house shaped
   ask LAs [if is-string? LAs-population-t                                                           ; A check to make sure that both random and non-random models have population recorded properly as a number
     [set LAs-population-t read-from-string LAs-population-t] ]                                      ; population recorded properly as a number.
-  if projection = "Random"                                                                          ; IF RANDOM,
+
+  ifelse projection = "Random"                                                                      ; IF RANDOM,
     [ask LAs [ifelse Tram_Commute_Only?                                                             ; Check to see if the modeller input is set to "houses and places only in LAs with tramstops"
       [if any? tramstops with [LAs-name-t = [LAs-name-t] of myself]                                 ; IF SO, LAs with tramstops  ...
         [hatch-houses 1 + random LAs-population-t  ] ]                                              ; hatch at least one house, plus some random number between 0 and their populaton
       [hatch-houses 1 + random LAs-population-t  ] ] ]                                              ; OTHERWISE, all LAs hatch at least one house, plus some random number between 0 and their populaton.
+    [                                                                                               ; IF NOT RANDOM,
 
-  if projection = "GM_LAs"                                                                          ; IF NOT RANDOM,
-    [ask LAs [ifelse Tram_Commute_Only?                                                             ; Check to see if the modeller input is set to "houses and places only in LAs with tramstops"
+  ask LAs [ifelse Tram_Commute_Only?                                                             ; Check to see if the modeller input is set to "houses and places only in LAs with tramstops"
       [if any? tramstops with [LAs-name-t = [LAs-name-t] of myself]                                 ; IF SO, LAs with tramstops  ...
            [hatch-houses ( LAs-population-t / 1000 )                                                ; Hatch one house per 1000 people
           if Garrulous?
@@ -379,7 +381,7 @@ CHOOSER
 55
 projection
 projection
-"GM_LAs" "Random"
+"GM_LAs_R" "Random"
 0
 
 SLIDER
@@ -391,7 +393,7 @@ Number_Generated_Tramstops_Random_Only
 Number_Generated_Tramstops_Random_Only
 3
 100
-25.0
+19.0
 1
 1
 NIL
@@ -406,7 +408,7 @@ Number_Generated_Places
 Number_Generated_Places
 3
 100
-17.0
+69.0
 1
 1
 NIL
@@ -466,7 +468,7 @@ Number_Generated_LAs_Random_Only
 Number_Generated_LAs_Random_Only
 2
 15
-5.0
+7.0
 1
 1
 NIL
@@ -534,9 +536,53 @@ SWITCH
 422
 Export_Data?
 Export_Data?
-0
+1
 1
 -1000
+
+MONITOR
+912
+93
+1014
+138
+Total population
+count(denizens)
+17
+1
+11
+
+MONITOR
+922
+165
+1005
+210
+Total houses
+count(houses)
+17
+1
+11
+
+MONITOR
+922
+249
+1001
+294
+Total places
+count(places)
+17
+1
+11
+
+MONITOR
+917
+13
+1023
+58
+Total trampstops
+count(tramstops)
+17
+1
+11
 
 @#$#@#$#@
 ## WHAT IS IT?
