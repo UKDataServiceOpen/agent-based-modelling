@@ -1,5 +1,14 @@
 extensions [ csv ]
 
+; WORKSHOP TASKS
+;;           Open CSV model in NetLogo
+;;           Navigate tabs
+;;           Run as random
+;;           Write to .csv file
+;;           Read from .csv file
+;;           Experiment with making new .csv to read from?
+
+
 to setup
   clear-all
   file-close-all ; Close any files open from last run
@@ -22,7 +31,7 @@ to write-turtles-to-csv
   csv:to-file "turtles.csv" [ (list xcor ycor size color heading) ] of turtles
 end
 
-; procedure to read some turtle properties from a file
+; procedure to read some turtle properties from a file. Current options include 'turtles_diagonal' and 'turtles_gridlike'
 to read-turtles-from-csv
   file-close-all ; close all open files
 

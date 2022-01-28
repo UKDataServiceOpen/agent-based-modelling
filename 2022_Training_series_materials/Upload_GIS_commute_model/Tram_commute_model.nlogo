@@ -1,3 +1,11 @@
+; WORKSHOP TASKS
+;;            Open GIS_commute model in NetLogo
+;;            Run as random, experiment with various settings
+;;            Examine code/folders for data files (.shp, etc.)
+;;            Run as GM_LAs, experiment with various settings  (will be slow)
+;;            Try export to data option, inspect the data
+
+
 extensions [ gis                                                              ; GIS extension for NetLogo, needed if using imported shapefiles
              nw                                                               ; NW extension for NetLogo, needed to create the network shapes for houses, destinations, etc.
              csv ]                                                            ; CSV extension for NetLogo, needed to read in the file of which tramstops are connected
