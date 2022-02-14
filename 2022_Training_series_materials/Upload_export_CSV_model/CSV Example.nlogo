@@ -7,6 +7,7 @@ extensions [ csv ]
 ;;           Write to .csv file
 ;;           Read from .csv file
 ;;           Experiment with making new .csv to read from?
+;;                 just_one
 
 
 to setup
@@ -35,12 +36,12 @@ end
 to read-turtles-from-csv
   file-close-all ; close all open files
 
-  if not file-exists? "turtles_gridlike.csv" [
-    user-message "No file 'turtles.csv' exists! Try pressing WRITE-TURTLES-TO-CSV."
+  if not file-exists? "just_one.csv" [
+    user-message "No file 'just_one.csv' exists! Try pressing WRITE-TURTLES-TO-CSV."
     stop
   ]
 
-  file-open "turtles_gridlike.csv" ; open the file with the turtle data
+  file-open "just_one.csv" ; open the file with the turtle data
 
   ; We'll read all the data in a single loop
   while [ not file-at-end? ] [
@@ -185,6 +186,17 @@ NIL
 NIL
 NIL
 0
+
+INPUTBOX
+725
+30
+942
+90
+file_name
+NIL
+1
+0
+String
 
 @#$#@#$#@
 ## WHAT IS IT?
