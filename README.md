@@ -36,5 +36,10 @@ This webinar:
 ## Resources
 
 The webinars are published on the UK Data Service Youtube channel: [https://www.youtube.com/user/UKDATASERVICE/](https://www.youtube.com/user/UKDATASERVICE/)
+The models demonstrated by Kavin Narasimhan in the guest lecture (March 2022) can be found here: 
+* [WATERING irrigation](https://doi.org/10.5281/zenodo.6323633) and 
+* [WATERING crop growth](https://doi.org/10.5281/zenodo.6323653)
+
+
 
 The slides and other resources (e.g., reading lists) can be found in the `webinars` folder.
